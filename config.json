@@ -1,0 +1,21 @@
+ {
+	"preFilters": [{
+		"paths": ["/v1/services/{id:.*}", "/v1/service", "/v2-beta/projects/1a8/stack", "/env/1a8/apps/stacks"],
+		"endpoint": "http://54.169.69.238:8080/v1-auth-filter/validateAuthToken",
+		"methods": ["post", "delete", "get"],
+		"secretToken": ""
+	}, {
+		"paths": ["/v2-beta/projects/1a8/stack"],
+		"endpoint": "http://localhost:8092/external-thing",
+		"methods": ["post", "delete"],
+		"secretToken": ""
+	}],
+	
+	"destinations": [{
+		"paths": ["/v1/services/{id:.*}", "/v2-beta/projects/1a8/stack"],
+		"destinationURL": "http://54.255.182.226:8080/"
+	}, {
+		"paths": ["/v2/services/", "/v21/service"],
+		"destinationURL": "http:/.../external-thing"
+	}]
+}
