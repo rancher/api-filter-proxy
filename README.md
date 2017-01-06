@@ -1,7 +1,7 @@
 api-filter-proxy
 ========
 
-A microservice that does micro things.
+A microservice that acts as a proxy to Rancher API server, intercepting the API calls configured in the config.json. For each API call intercepted, the proxy will call the specified endpoint(s) and then forward the API to the destination specified.
 
 ## Building
 
