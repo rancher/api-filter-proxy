@@ -75,11 +75,13 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var jsonInput map[string]interface{}
-	err = json.Unmarshal(bodyBytes, &jsonInput)
-	if err != nil {
-		log.Errorf("Error unmarshalling json request body: %v", err)
-		ReturnHTTPError(w, r, http.StatusBadRequest, fmt.Sprintf("Error reading json request body: %v", err))
-		return
+	if len(bodyBytes) > 0 {
+		err = json.Unmarshal(bodyBytes, &jsonInput)
+		if err != nil {
+			log.Errorf("Error unmarshalling json request body: %v", err)
+			ReturnHTTPError(w, r, http.StatusBadRequest, fmt.Sprintf("Error reading json request body: %v", err))
+			return
+		}
 	}
 
 	headerMap := make(map[string][]string)
