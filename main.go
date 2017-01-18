@@ -96,11 +96,11 @@ func StartService(c *cli.Context) {
 
 	log.Info("Starting Rancher api-filter-proxy service %v", manager.ConfigFields)
 
-	service.NewRouter(manager.ConfigFields)
-
-	router := service.Router
+	router := service.NewRouter(manager.ConfigFields)
+	service.Wrapper = &service.MuxWrapper{router}
 
 	log.Info("Listening on ", c.GlobalString("listen"))
-	log.Fatal(http.ListenAndServe(c.GlobalString("listen"), router))
+
+	log.Fatal(http.ListenAndServe(c.GlobalString("listen"), service.Wrapper))
 
 }

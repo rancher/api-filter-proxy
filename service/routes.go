@@ -9,10 +9,19 @@ import (
 	"github.com/rancher/api-filter-proxy/manager"
 )
 
-var Router *mux.Router
+var Wrapper *MuxWrapper
+
+//MuxWrapper is a wrapper over the mux router
+type MuxWrapper struct {
+	Router *mux.Router
+}
+
+func (httpWrapper *MuxWrapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	httpWrapper.Router.ServeHTTP(w, r)
+}
 
 //NewRouter creates and configures a mux router
-func NewRouter(configFields manager.ConfigFileFields) {
+func NewRouter(configFields manager.ConfigFileFields) *mux.Router {
 	// API framework routes
 	router := mux.NewRouter().StrictSlash(false)
 
@@ -25,7 +34,9 @@ func NewRouter(configFields manager.ConfigFileFields) {
 			}
 		}
 	}
-
+	router.Methods("POST").Path("/v1-api-filter-proxy/reload").HandlerFunc(http.HandlerFunc(reload))
 	router.NotFoundHandler = http.HandlerFunc(handleNotFoundRequest)
-	Router = router
+
+	return router
+
 }
