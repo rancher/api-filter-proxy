@@ -89,7 +89,9 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 		headerMap[key] = value
 	}
 
-	inputBody, inputHeaders, destination, proxyErr := manager.ProcessPreFilters(path, jsonInput, headerMap)
+	api := r.URL.Path
+
+	inputBody, inputHeaders, destination, proxyErr := manager.ProcessPreFilters(path, api, jsonInput, headerMap)
 	if proxyErr.Status != "" {
 		//error from some filter
 		log.Debugf("Error from proxy filter %v", proxyErr)
@@ -120,7 +122,7 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleNotFoundRequest(w http.ResponseWriter, r *http.Request) {
-	log.Debugf("Request path NOT matched to proxy config")
+	log.Debugf("Request path NOT matched to proxy config: %v, proxy to %v", r.URL.Path, manager.DefaultDestination)
 	destProxy, err := NewProxy(manager.DefaultDestination)
 	if err != nil {
 		log.Errorf("Error creating a reverse proxy for destination %v", manager.DefaultDestination)
@@ -128,4 +130,16 @@ func handleNotFoundRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	destProxy.reverseProxy.ServeHTTP(w, r)
+}
+
+func reload(w http.ResponseWriter, r *http.Request) {
+	log.Info("Reload proxy config")
+	err := manager.Reload()
+	if err != nil {
+		//failed to reload the config from the config.json
+		log.Debugf("Reload failed with error %v", err)
+		ReturnHTTPError(w, r, http.StatusInternalServerError, "Failed to reload the proxy config")
+		return
+	}
+	Wrapper.Router = NewRouter(manager.ConfigFields)
 }
